@@ -1,26 +1,22 @@
-# apps/accounts/views.py
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
 from .serializers import RegisterSerializer, UserSerializer
 
 
+# ✅ Register User
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    """
-    Register a new user.
-    """
     username = request.data.get('username')
     email = request.data.get('email')
     phone = request.data.get('phone')
     password = request.data.get('password')
 
-    # ✅ Basic validation
     if not username or not email or not phone or not password:
         return Response({"detail": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -31,16 +27,13 @@ def register_user(request):
     if serializer.is_valid():
         serializer.save()
         return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# ✅ Profile View (Authenticated)
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def profile_view(request):
-    """
-    Handles fetching and updating the user's profile.
-    """
     user = request.user
 
     if request.method == 'GET':
@@ -55,15 +48,11 @@ def profile_view(request):
         return Response(serializer.errors, status=400)
 
 
-# ✅ Custom JWT login serializer
+# ✅ Custom JWT Login Serializer
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Add user details + admin flags in login response.
-    """
     def validate(self, attrs):
         data = super().validate(attrs)
         user = self.user
-
         data.update({
             "id": user.id,
             "username": user.username,
@@ -72,9 +61,38 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "is_staff": user.is_staff,
             "is_admin": user.is_superuser or user.is_staff,
         })
-
         return data
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+# ✅ Admin — List & Create Users
+class AdminUserListCreateAPIView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+
+
+# ✅ Admin — Update & Delete User
+class AdminUserUpdateDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+
+
+# ✅ Admin — Get User Statistics (Total, Active, Hold)
+class AdminUserStatsAPIView(generics.GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        total_users = User.objects.count()
+        active_users = User.objects.filter(is_active=True).count()
+        hold_users = User.objects.filter(is_active=False).count()
+
+        return Response({
+            "total_users": total_users,
+            "active_users": active_users,
+            "hold_users": hold_users,
+        })

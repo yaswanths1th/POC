@@ -1,4 +1,3 @@
-# apps/accounts/serializers.py
 from rest_framework import serializers
 from .models import User
 
@@ -6,16 +5,7 @@ from .models import User
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'password',
-            'role',
-        ]
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -36,12 +26,4 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'role',
-        ]
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'role', 'is_active']

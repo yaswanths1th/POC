@@ -1,117 +1,136 @@
-// src/admin/AdminDashboard.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../layouts/AdminLayout.css";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
-  const [recentUsers, setRecentUsers] = useState([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    holdUsers: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const token = localStorage.getItem("access");
+  const API = axios.create({
+    baseURL: "http://127.0.0.1:8000/api/",
+  });
+
+  // 🧠 Axios Interceptor — Automatically refresh expired access token
+  API.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        localStorage.getItem("refresh")
+      ) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshToken = localStorage.getItem("refresh");
+          const res = await axios.post("http://127.0.0.1:8000/api/auth/token/refresh/", {
+            refresh: refreshToken,
+          });
+
+          localStorage.setItem("access", res.data.access);
+          API.defaults.headers.common["Authorization"] = `Bearer ${res.data.access}`;
+          originalRequest.headers["Authorization"] = `Bearer ${res.data.access}`;
+          return API(originalRequest);
+        } catch (refreshError) {
+          console.error("❌ Token refresh failed");
+          localStorage.removeItem("access");
+          localStorage.removeItem("refresh");
+          window.location.href = "/login";
+        }
+      }
+
+      return Promise.reject(error);
+    }
+  );
 
   useEffect(() => {
     fetchDashboardData();
+
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 10000); // 🔁 Refresh every 10 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get(
-        "http://127.0.0.1:8000/api/viewprofile/admin/users/",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      setLoading(true);
+      setError("");
 
-      const users = Array.isArray(res.data)
-        ? res.data
-        : res.data.results || [];
+      const token = localStorage.getItem("access");
 
-      // sort newest first
-      const sorted = [...users].sort(
-        (a, b) => new Date(b.date_joined) - new Date(a.date_joined)
-      );
+      const res = await API.get("auth/admin/stats/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const today = new Date().toISOString().slice(0, 10);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-
-      const todayCount = sorted.filter(
-        (u) => u.date_joined && u.date_joined.slice(0, 10) === today
-      ).length;
-
-      const weekCount = sorted.filter(
-        (u) => new Date(u.date_joined) >= weekAgo
-      ).length;
+      // ✅ Expecting backend to return: { total_users, active_users, hold_users }
+      const data = res.data;
 
       setStats({
-        today: todayCount,
-        week: weekCount,
-        total: sorted.length,
+        totalUsers: data.total_users,
+        activeUsers: data.active_users,
+        holdUsers: data.hold_users,
       });
-      setRecentUsers(sorted.slice(0, 4));
     } catch (err) {
-      console.error("Error loading dashboard:", err.response?.data || err.message);
+      console.error("❌ Error fetching stats:", err.response?.data || err.message);
+      setError("Failed to load user stats. Check backend or token validity.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="admin-dashboard-container">
-      {/* 👋 Welcome */}
+      {/* 👋 Welcome Section */}
       <section className="welcome-section">
         <h1 className="welcome-text">Welcome To Admin Dashboard..!!</h1>
         <p className="subtitle">Manage your platform and settings</p>
       </section>
 
-      {/* 📊 Registration Stats */}
+      {/* 📊 User Overview */}
       <section className="stats-section">
-        <h3 className="section-title">User Registrations</h3>
-        <div className="stats-cards">
-          <div className="stat-card orange">
-            <div className="stat-info">
-              <h2>{stats.today}</h2>
-              <p>Today's Registrations</p>
-            </div>
-            <span className="badge orange">Today</span>
-          </div>
+        <h3 className="section-title">User Overview</h3>
 
-          <div className="stat-card blue">
-            <div className="stat-info">
-              <h2>{stats.week}</h2>
-              <p>Weekly Registrations</p>
-            </div>
-            <span className="badge blue">Week</span>
-          </div>
-
-          <div className="stat-card green">
-            <div className="stat-info">
-              <h2>{stats.total}</h2>
-              <p>Total Registrations</p>
-            </div>
-            <span className="badge green">All Time</span>
-          </div>
-        </div>
-      </section>
-
-      {/* 🧾 Recent Registrations */}
-      <section className="recent-section">
-        <h3 className="section-title">Recent Registrations</h3>
-        <div className="recent-table">
-          {recentUsers.length === 0 ? (
-            <p className="empty-text">No recent registrations found.</p>
-          ) : (
-            recentUsers.map((user) => (
-              <div key={user.id} className="recent-row">
-                <div className="user-info">
-                  <div className="user-name">{user.username}</div>
-                  <div className="user-email">{user.email}</div>
-                </div>
-                <div className="user-status active">Active</div>
-                <div className="user-date">
-                  {new Date(user.date_joined).toLocaleDateString()}
-                </div>
+        {loading ? (
+          <p className="loading-text">Loading data...</p>
+        ) : error ? (
+          <p className="error-text">{error}</p>
+        ) : (
+          <div className="stats-cards">
+            <div className="stat-card orange">
+              <div className="stat-info">
+                <h2>{stats.totalUsers}</h2>
+                <p>Total Users</p>
               </div>
-            ))
-          )}
-        </div>
+              <span className="badge orange">All</span>
+            </div>
+
+            <div className="stat-card green">
+              <div className="stat-info">
+                <h2>{stats.activeUsers}</h2>
+                <p>Active Users</p>
+              </div>
+              <span className="badge green">Active</span>
+            </div>
+
+            <div className="stat-card blue">
+              <div className="stat-info">
+                <h2>{stats.holdUsers}</h2>
+                <p>Hold Users</p>
+              </div>
+              <span className="badge blue">On Hold</span>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

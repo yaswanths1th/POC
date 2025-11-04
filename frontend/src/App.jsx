@@ -22,10 +22,20 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 function App() {
   console.log("✅ App loaded");
 
+  // 🔍 Check role from localStorage (set after login)
+  const userRole = localStorage.getItem("role"); // "admin" or "user"
+
+  // 🧭 Default redirection based on role
+  const getDefaultRoute = () => {
+    if (userRole === "admin") return "/admin/dashboard";
+    if (userRole === "user") return "/dashboard";
+    return "/login";
+  };
+
   return (
     <Routes>
       {/* Default route */}
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to={getDefaultRoute()} />} />
 
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
@@ -76,22 +86,22 @@ function App() {
       />
 
       {/* ✅ Admin routes */}
-<Route
-  path="/admin"
-  element={
-    <AdminProtectedRoute>
-      <AdminLayout />
-    </AdminProtectedRoute>
-  }
->
-  <Route path="dashboard" element={<AdminDashboard />} />
-  <Route path="users" element={<ManageUsers />} />
-  <Route path="reports" element={<Reports />} />
-  <Route path="settings" element={<AdminSettings />} />
-</Route>
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<ManageUsers />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<AdminSettings />} />
+      </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<Navigate to={getDefaultRoute()} />} />
     </Routes>
   );
 }
