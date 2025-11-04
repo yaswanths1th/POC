@@ -1,22 +1,54 @@
-import React, { useState } from "react";
+// src/admin/ManageUsers.jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ✅ for redirect
 import "./ManageUsers.css";
 
 export default function ManageUsers() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Jay", email: "jay@gmail.com", role: "Admin", status: "Active", joined: "Jan 20, 2025" },
-    { id: 2, name: "Yash", email: "yash@gmail.com", role: "User", status: "Inactive", joined: "Jan 22, 2025" },
-    { id: 3, name: "Pooja", email: "pooja@gmail.com", role: "User", status: "Active", joined: "Feb 01, 2025" },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [roleFilter, setRoleFilter] = useState("All Roles");
-
-  const [editUserId, setEditUserId] = useState(null);
-  const [editData, setEditData] = useState({ name: "", email: "", role: "", status: "" });
-
   const [isAdding, setIsAdding] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: "User", status: "Active" });
+  const [newUser, setNewUser] = useState({
+    username: "",
+    email: "",
+    role: "User",
+    is_active: "Active",
+  });
+
+  const token = localStorage.getItem("access");
+  const navigate = useNavigate(); // ✅ Initialize navigation hook
+
+  // 🔄 Fetch from Django API
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/api/accounts/all-users/", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const fetchedUsers = Array.isArray(res.data)
+        ? res.data
+        : res.data.results || [];
+
+      const formatted = fetchedUsers.map((u, index) => ({
+        id: u.id || index + 1,
+        name: u.username,
+        email: u.email,
+        role: u.is_superuser ? "Admin" : "User",
+        status: u.is_active ? "Active" : "Inactive",
+        joined: new Date(u.date_joined).toLocaleDateString(),
+      }));
+
+      setUsers(formatted);
+    } catch (err) {
+      console.error("❌ Error fetching users:", err.response?.data || err.message);
+    }
+  };
 
   // 🔍 Filtering
   const filteredUsers = users.filter((user) => {
@@ -29,36 +61,12 @@ export default function ManageUsers() {
     return matchesSearch && matchesStatus && matchesRole;
   });
 
-  // ✏️ Edit existing user
+  // 🧭 Redirect to /viewprofile page on edit click
   const handleEditClick = (user) => {
-    setEditUserId(user.id);
-    setEditData({ name: user.name, email: user.email, role: user.role, status: user.status });
+    navigate(`/viewprofile/${user.id}`);  // ✅ Redirect
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
-  };
-
-  const handleSave = (id) => {
-    const updatedUsers = users.map((u) =>
-      u.id === id ? { ...u, ...editData } : u
-    );
-    setUsers(updatedUsers);
-    setEditUserId(null);
-  };
-
-  const handleCancel = () => {
-    setEditUserId(null);
-    setIsAdding(false);
-  };
-
-  // ➕ Inline Add User
-  const handleAddUser = () => {
-    setIsAdding(true);
-    setNewUser({ name: "", email: "", role: "User", status: "Active" });
-  };
-
+  // ➕ Inline Add User (unchanged)
   const handleNewUserChange = (e) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
@@ -69,25 +77,23 @@ export default function ManageUsers() {
       alert("Please fill in all required fields!");
       return;
     }
-
     const newEntry = {
       id: users.length + 1,
       ...newUser,
       joined: new Date().toLocaleDateString(),
     };
-
     setUsers([...users, newEntry]);
     setIsAdding(false);
   };
 
-  // 🗑️ Delete
+  const handleCancel = () => setIsAdding(false);
+
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       setUsers(users.filter((u) => u.id !== id));
     }
   };
 
-  // 📤 Export CSV
   const handleExport = () => {
     const csv = [
       ["Name", "Email", "Role", "Status", "Joined"],
@@ -113,7 +119,7 @@ export default function ManageUsers() {
         </div>
         <div className="header-right">
           <button className="btn btn-gray" onClick={handleExport}>Export</button>
-          <button className="btn btn-primary" onClick={handleAddUser}>+ Add User</button>
+          <button className="btn btn-primary" onClick={() => setIsAdding(true)}>+ Add User</button>
         </div>
       </div>
 
@@ -160,7 +166,7 @@ export default function ManageUsers() {
             </tr>
           </thead>
           <tbody>
-            {/* Add new user inline row */}
+            {/* Add new user row */}
             {isAdding && (
               <tr className="adding-row">
                 <td>
@@ -203,45 +209,20 @@ export default function ManageUsers() {
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
                 <tr key={user.id}>
-                  {editUserId === user.id ? (
-                    <>
-                      <td><input name="name" value={editData.name} onChange={handleEditChange} /></td>
-                      <td><input name="email" value={editData.email} onChange={handleEditChange} /></td>
-                      <td>
-                        <select name="role" value={editData.role} onChange={handleEditChange}>
-                          <option>Admin</option>
-                          <option>User</option>
-                        </select>
-                      </td>
-                      <td>
-                        <select name="status" value={editData.status} onChange={handleEditChange}>
-                          <option>Active</option>
-                          <option>Inactive</option>
-                        </select>
-                      </td>
-                      <td>{user.joined}</td>
-                      <td className="actions">
-                        <button className="icon-btn save" onClick={() => handleSave(user.id)}>💾</button>
-                        <button className="icon-btn cancel" onClick={handleCancel}>❌</button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`role-badge ${user.role.toLowerCase()}`}>{user.role}</span>
-                      </td>
-                      <td>
-                        <span className={`status ${user.status.toLowerCase()}`}>{user.status}</span>
-                      </td>
-                      <td>{user.joined}</td>
-                      <td className="actions">
-                        <button className="icon-btn edit" onClick={() => handleEditClick(user)}>✏️</button>
-                        <button className="icon-btn delete" onClick={() => handleDelete(user.id)}>🗑️</button>
-                      </td>
-                    </>
-                  )}
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    <span className={`role-badge ${user.role.toLowerCase()}`}>{user.role}</span>
+                  </td>
+                  <td>
+                    <span className={`status ${user.status.toLowerCase()}`}>{user.status}</span>
+                  </td>
+                  <td>{user.joined}</td>
+                  <td className="actions">
+                    {/* ✅ Redirect to /viewprofile on click */}
+                    <button className="icon-btn edit" onClick={() => handleEditClick(user)}>✏️</button>
+                    <button className="icon-btn delete" onClick={() => handleDelete(user.id)}>🗑️</button>
+                  </td>
                 </tr>
               ))
             ) : (
