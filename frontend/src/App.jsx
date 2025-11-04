@@ -20,10 +20,25 @@ import AdminSettings from "./admin/AdminSettings";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 function App() {
+<<<<<<< HEAD
+=======
+  console.log("✅ App loaded");
+
+  // 🔍 Check role from localStorage (set after login)
+  const userRole = localStorage.getItem("role"); // "admin" or "user"
+
+  // 🧭 Default redirection based on role
+  const getDefaultRoute = () => {
+    if (userRole === "admin") return "/admin/dashboard";
+    if (userRole === "user") return "/dashboard";
+    return "/login";
+  };
+
+>>>>>>> c4abb73 (Updated backend and frontend structure, removed old sidebar components)
   return (
     <Routes>
       {/* Default route */}
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to={getDefaultRoute()} />} />
 
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
@@ -81,7 +96,11 @@ function App() {
         }
       />
 
+<<<<<<< HEAD
       {/* Admin routes */}
+=======
+      {/* ✅ Admin routes */}
+>>>>>>> c4abb73 (Updated backend and frontend structure, removed old sidebar components)
       <Route
         path="/admin"
         element={
@@ -94,12 +113,15 @@ function App() {
         <Route path="users" element={<ManageUsers />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<AdminSettings />} />
+<<<<<<< HEAD
         {/* ✅ Admin view user profile */}
         <Route path="viewprofile/:id" element={<ViewProfile />} />
+=======
+>>>>>>> c4abb73 (Updated backend and frontend structure, removed old sidebar components)
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<Navigate to={getDefaultRoute()} />} />
     </Routes>
   );
 }

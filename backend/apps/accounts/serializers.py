@@ -1,20 +1,10 @@
-# apps/accounts/serializers.py
 from rest_framework import serializers
 from .models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'phone',
-            'password',
-            'role',
-        ]
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -35,6 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+<<<<<<< HEAD
         fields = [
             'id',
             'username',
@@ -60,3 +51,6 @@ class UserManagementSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return "Active" if obj.is_active else "Inactive"
+=======
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'role', 'is_active']
+>>>>>>> c4abb73 (Updated backend and frontend structure, removed old sidebar components)
