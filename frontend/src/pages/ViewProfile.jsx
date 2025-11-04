@@ -1,52 +1,92 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./ViewProfilePage.css";
 
 function ViewProfilePage() {
+  const { id: routeId } = useParams();
   const [user, setUser] = useState({});
   const [address, setAddress] = useState({});
-  const token = localStorage.getItem("access");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const token = localStorage.getItem("access");
 
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     const fetchData = async () => {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      // ✅ Get user ID from route or localStorage
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = routeId || storedUser.id;
+
+      if (!userId) {
+        console.error("❌ No user ID found!");
+        navigate("/login");
+        return;
+      }
+
       try {
-        const userRes = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        // ✅ Fetch user profile
+        const profileUrl = `http://127.0.0.1:8000/api/accounts/user/${userId}/`;
+        const userRes = await fetch(profileUrl, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (!userRes.ok) throw new Error("Failed to fetch user profile");
         const userData = await userRes.json();
         setUser(userData);
 
-        const addrRes = await fetch("http://127.0.0.1:8000/api/addresses/", {
+        // ✅ Fetch user address
+        const addressUrl = `http://127.0.0.1:8000/api/addresses/?user=${userId}`;
+        const addrRes = await fetch(addressUrl, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
-        const addrData = await addrRes.json();
-        if (addrData.length > 0) setAddress(addrData[0]);
+
+        if (addrRes.ok) {
+          const addrData = await addrRes.json();
+          if (Array.isArray(addrData) && addrData.length > 0) {
+            setAddress(addrData[0]);
+          }
+        }
+
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("❌ Error fetching profile:", err);
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [token, navigate]);
+  }, [token, navigate, routeId]);
 
-  const handleEdit = () => navigate("/edit-profile");
+  // ✅ Handlers
+  const handleEdit = () => {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = routeId || storedUser.id;
+
+    // ✅ Store the user ID before navigating
+    localStorage.setItem("edit_user_id", userId);
+    navigate("/edit-profile");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
     navigate("/login");
   };
+
   const handleChangePassword = () => navigate("/changepassword");
+
+  if (loading) return <div className="view-profile-page">Loading...</div>;
 
   return (
     <div className="view-profile-page">
@@ -65,6 +105,7 @@ function ViewProfilePage() {
         </div>
       </div>
 
+      {/* ✅ Personal Details */}
       <div className="profile-card">
         <h3 className="edit-subsection-title">Personal Details</h3>
         <div className="edit-form-grid">
@@ -77,16 +118,25 @@ function ViewProfilePage() {
             <input readOnly value={user.last_name || ""} />
           </div>
           <div className="edit-form-group">
-            <label>Phone Number</label>
-            <input readOnly value={user.phone || ""} />
+            <label>Username</label>
+            <input readOnly value={user.username || ""} />
           </div>
           <div className="edit-form-group">
             <label>Email</label>
             <input readOnly value={user.email || ""} />
           </div>
+          <div className="edit-form-group">
+            <label>Phone Number</label>
+            <input readOnly value={user.phone || ""} />
+          </div>
+          <div className="edit-form-group">
+            <label>Role</label>
+            <input readOnly value={user.is_superuser ? "Admin" : "User"} />
+          </div>
         </div>
       </div>
 
+      {/* ✅ Address Details */}
       <div className="profile-card">
         <h3 className="edit-subsection-title">Address Details</h3>
         <div className="edit-form-grid">
@@ -103,11 +153,9 @@ function ViewProfilePage() {
           ].map((key) => (
             <div className="edit-form-group" key={key}>
               <label>
-                {key === "house"
-                  ? "Flat No. / House"
-                  : key
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (char) => char.toUpperCase())}
+                {key
+                  .replace(/_/g, " ")
+                  .replace(/\b\w/g, (char) => char.toUpperCase())}
               </label>
               <input readOnly value={address[key] || ""} />
             </div>

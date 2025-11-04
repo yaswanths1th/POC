@@ -1,4 +1,4 @@
-// src/App.jsx
+// ✅ src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -11,7 +11,7 @@ import ViewProfile from "./pages/ViewProfile";
 import ChangePassword from "./pages/ChangePassword";
 import EditProfilePage from "./pages/EditProfile";
 
-// 🧩 Admin imports
+// Admin imports
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
 import ManageUsers from "./admin/ManageUsers";
@@ -20,8 +20,6 @@ import AdminSettings from "./admin/AdminSettings";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 function App() {
-  console.log("✅ App loaded");
-
   return (
     <Routes>
       {/* Default route */}
@@ -51,13 +49,21 @@ function App() {
         }
       />
       <Route
-        path="/viewprofile"
-        element={
-          <ProtectedRoute>
-            <ViewProfile />
-          </ProtectedRoute>
-        }
-      />
+  path="/viewprofile"
+  element={
+    <ProtectedRoute>
+      <ViewProfile />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/viewprofile/:id"
+  element={
+    <ProtectedRoute>
+      <ViewProfile />
+    </ProtectedRoute>
+  }
+/>
       <Route
         path="/edit-profile"
         element={
@@ -75,20 +81,22 @@ function App() {
         }
       />
 
-      {/* ✅ Admin routes */}
-<Route
-  path="/admin"
-  element={
-    <AdminProtectedRoute>
-      <AdminLayout />
-    </AdminProtectedRoute>
-  }
->
-  <Route path="dashboard" element={<AdminDashboard />} />
-  <Route path="users" element={<ManageUsers />} />
-  <Route path="reports" element={<Reports />} />
-  <Route path="settings" element={<AdminSettings />} />
-</Route>
+      {/* Admin routes */}
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<ManageUsers />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<AdminSettings />} />
+        {/* ✅ Admin view user profile */}
+        <Route path="viewprofile/:id" element={<ViewProfile />} />
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/login" />} />

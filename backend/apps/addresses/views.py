@@ -6,13 +6,12 @@ from rest_framework.response import Response
 
 class AddressListCreateView(generics.ListCreateAPIView):
     serializer_class = AddressSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user_id = self.request.query_params.get('user')
+        if user_id:
+            return Address.objects.filter(user__id=user_id)
+        return Address.objects.all()
 
 
 class AddressRetrieveUpdateView(generics.RetrieveUpdateAPIView):

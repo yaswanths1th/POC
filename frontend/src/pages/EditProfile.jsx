@@ -32,10 +32,13 @@ function EditProfilePage() {
       return;
     }
 
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const editUserId = localStorage.getItem("edit_user_id") || storedUser.id;
+
     const fetchProfileAndAddress = async () => {
       try {
-        // Fetch user data
-        const userRes = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        // ✅ Fetch user data
+        const userRes = await fetch(`http://127.0.0.1:8000/api/accounts/user/${editUserId}/`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -49,8 +52,8 @@ function EditProfilePage() {
           email: userData.email || "",
         });
 
-        // Fetch address data
-        const addrRes = await fetch("http://127.0.0.1:8000/api/addresses/", {
+        // ✅ Fetch address data
+        const addrRes = await fetch(`http://127.0.0.1:8000/api/addresses/?user=${editUserId}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -120,7 +123,6 @@ function EditProfilePage() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      // Save user details
       await fetch("http://127.0.0.1:8000/api/auth/profile/", {
         method: "POST",
         headers: {
@@ -130,7 +132,6 @@ function EditProfilePage() {
         body: JSON.stringify(user),
       });
 
-      // Save address
       const addressUrl = address.id
         ? `http://127.0.0.1:8000/api/addresses/${address.id}/`
         : "http://127.0.0.1:8000/api/addresses/";
@@ -145,7 +146,8 @@ function EditProfilePage() {
         body: JSON.stringify(address),
       });
 
-      navigate("/viewprofile");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      navigate(`/viewprofile/${storedUser.id}`);
     } catch (err) {
       console.error("Error saving profile:", err);
     }
@@ -206,9 +208,7 @@ function EditProfilePage() {
                   <label>
                     {key === "house_flat"
                       ? "Flat No. / House"
-                      : key
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (char) => char.toUpperCase())}
+                      : key.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
                     {key === "postal_code" && loadingPinLookup && (
                       <span style={{ marginLeft: 8, color: "#888", fontSize: "0.9em" }}>
                         (Fetching…)
@@ -231,7 +231,7 @@ function EditProfilePage() {
             <button
               type="button"
               className="cancel-btn"
-              onClick={() => navigate("/viewprofile")}
+              onClick={() => navigate(`/viewprofile/${JSON.parse(localStorage.getItem("user") || "{}").id}`)}
             >
               Cancel
             </button>
