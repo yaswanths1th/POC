@@ -1,0 +1,12 @@
+* [33m90048e9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32myash[m[33m, [m[1;31morigin/yash[m[33m)[m Initial commit
+*   [33m6aa8691[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #1 from yaswanths1th/mahi
+[32m|[m[33m\[m  
+[32m|[m * [33m1c8afc4[m[33m ([m[1;31morigin/mahi[m[33m, [m[1;32mmahi[m[33m)[m Add admin folder
+[32m|[m [33m|[m * [33mc4abb73[m[33m ([m[1;32mmain[m[33m)[m Updated backend and frontend structure, removed old sidebar components
+[32m|[m [33m|[m[33m/[m  
+[32m|[m * [33mf9523ed[m Add admin folder from frontend/src
+[32m|[m[32m/[m  
+*   [33m3a71a0b[m Initial commit
+[35m|[m[36m\[m  
+[35m|[m * [33m93f36ab[m Initial commit
+* [33m33c1a43[m Initial commit
