@@ -9,12 +9,10 @@ from .models import User
 from .serializers import RegisterSerializer, UserSerializer
 
 
+# 🧩 Register new user
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    """
-    Register a new user.
-    """
     username = request.data.get('username')
     email = request.data.get('email')
     phone = request.data.get('phone')
@@ -35,12 +33,10 @@ def register_user(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# 🧠 Profile view/update (for logged-in user)
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def profile_view(request):
-    """
-    Handles fetching and updating the user's profile.
-    """
     user = request.user
 
     if request.method == 'GET':
@@ -55,11 +51,8 @@ def profile_view(request):
         return Response(serializer.errors, status=400)
 
 
-# ✅ Custom JWT login serializer
+# ✅ Custom JWT Login
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Add user details + admin flags in login response.
-    """
     def validate(self, attrs):
         data = super().validate(attrs)
         user = self.user
@@ -78,3 +71,60 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+# 🧾 Admin Endpoint: Fetch All Users
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_all_users(request):
+    """
+    Fetch all users for Admin Dashboard or ManageUsers page.
+    Accessible to all authenticated users for display,
+    but only superusers can see all users.
+    """
+    user = request.user
+
+    # ✅ Print to debug token (optional)
+    print("🔐 Authenticated user:", user.username)
+    print("🧩 is_superuser:", user.is_superuser)
+
+    # ✅ Only allow admins to view everyone
+    if not user.is_superuser:
+        # Regular users can still fetch only themselves (optional)
+        serialized = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "is_superuser": user.is_superuser,
+            "is_active": user.is_active,
+            "date_joined": user.date_joined,
+        }
+        return Response([serialized], status=status.HTTP_200_OK)
+
+    # ✅ If admin → return all users
+    users = User.objects.all().order_by('-date_joined')
+    serialized = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "is_superuser": u.is_superuser,
+            "is_active": u.is_active,
+            "date_joined": u.date_joined,
+        }
+        for u in users
+    ]
+    return Response(serialized, status=status.HTTP_200_OK)
+
+
+# 🧍‍♂️ NEW: Fetch Single User Details by ID
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_details(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)

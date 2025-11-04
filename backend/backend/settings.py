@@ -16,6 +16,7 @@ DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 # ✅ Allow localhost and 127.0.0.1
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
+CORS_ALLOW_ALL_ORIGINS = True
 # ---------- Installed Apps ----------
 INSTALLED_APPS = [
     "django.contrib.admin",

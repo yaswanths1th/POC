@@ -2,7 +2,6 @@
 from rest_framework import serializers
 from .models import User
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -45,3 +44,19 @@ class UserSerializer(serializers.ModelSerializer):
             'phone',
             'role',
         ]
+
+
+# ✅ New Serializer for ManageUsers.jsx
+class UserManagementSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'role', 'status', 'date_joined']
+
+    def get_role(self, obj):
+        return "Admin" if obj.is_superuser else "User"
+
+    def get_status(self, obj):
+        return "Active" if obj.is_active else "Inactive"

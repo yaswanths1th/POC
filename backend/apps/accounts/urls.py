@@ -2,7 +2,11 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
-from .views import register_user, profile_view, CustomTokenObtainPairView
+from .views import register_user, profile_view, CustomTokenObtainPairView, list_all_users
+from .views import (
+    register_user, profile_view, CustomTokenObtainPairView,
+    list_all_users, get_user_details
+)
 
 urlpatterns = [
     # ✅ Custom login view (includes is_admin flag)
@@ -14,4 +18,8 @@ urlpatterns = [
     # ✅ Register and Profile
     path("register/", register_user, name="register_user"),
     path("profile/", profile_view, name="profile_view"),
+
+    # ✅ NEW: User list for ManageUsers.jsx
+    path("all-users/", list_all_users, name="list_all_users"),
+    path("user/<int:user_id>/", get_user_details, name="get_user_details"),
 ]

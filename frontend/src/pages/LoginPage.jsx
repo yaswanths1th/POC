@@ -20,19 +20,20 @@ function LoginPage() {
       });
 
       const data = await response.json();
-      console.log("🧠 Login response:", data); // 👀 Debug log
+      console.log("🧠 Login response:", data);
 
       if (!response.ok) {
         setError("Login failed: " + (data.detail || "Unknown error"));
         return;
       }
 
-      // ✅ Store tokens
+      // ✅ Save access & refresh tokens
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
-      // ✅ Store user info safely
+      // ✅ Store user info including ID
       const userInfo = {
+        id: data.id, // 👈 make sure backend returns `id`
         username: data.username,
         email: data.email,
         is_superuser: data.is_superuser,
@@ -41,14 +42,14 @@ function LoginPage() {
       };
       localStorage.setItem("user", JSON.stringify(userInfo));
 
-      // ✅ Redirect admin users
+      // ✅ Redirect admins to dashboard
       if (data.is_admin || data.is_superuser || data.is_staff) {
         console.log("✅ Redirecting to admin dashboard...");
         navigate("/admin/dashboard", { replace: true });
         return;
       }
 
-      // ✅ Check if user already has address
+      // ✅ Check if address exists for normal users
       const token = data.access;
       const checkResponse = await fetch(
         "http://127.0.0.1:8000/api/addresses/check/",
@@ -65,10 +66,11 @@ function LoginPage() {
       console.log("🏠 Address check:", checkData);
 
       if (checkResponse.ok && checkData.has_address) {
-        navigate("/viewprofile", { replace: true });
-      } else {
-        navigate("/addresses", { replace: true });
-      }
+  navigate(`/viewprofile/${data.id}`, { replace: true });
+} else {
+  navigate("/addresses", { replace: true });
+}
+
     } catch (err) {
       console.error("❌ Login error:", err);
       setError("Something went wrong. Please try again.");

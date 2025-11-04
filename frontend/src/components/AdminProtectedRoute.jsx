@@ -2,14 +2,25 @@ import { Navigate } from "react-router-dom";
 
 function AdminProtectedRoute({ children }) {
   const token = localStorage.getItem("access");
-  const user = JSON.parse(localStorage.getItem("user")); // Store user info when login
+  const userData = localStorage.getItem("user");
 
+  // No token at all → login
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!user?.is_superuser) {
-    return <Navigate to="/dashboard" replace />; // redirect normal users
+  // Parse user only if exists
+  let user = null;
+  try {
+    user = userData ? JSON.parse(userData) : null;
+  } catch (err) {
+    console.error("Error parsing user from localStorage:", err);
+    return <Navigate to="/login" replace />;
+  }
+
+  // Not admin → redirect to normal dashboard
+  if (!user?.is_superuser && !user?.is_admin && !user?.is_staff) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

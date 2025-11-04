@@ -1,8 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 
 urlpatterns = [
     # ✅ Rename Django admin to avoid route conflict
+    path('', lambda request: HttpResponse("Welcome to the homepage")),
+    # ... your other paths
     path('dj-admin/', admin.site.urls),
 
     # ✅ API routes
@@ -11,4 +14,5 @@ urlpatterns = [
     path('api/password-reset/', include('apps.password_reset.urls')),
     path('api/viewprofile/', include('apps.viewprofile.urls')),
     path('api/change-password/', include('apps.change_password.urls')),
+    path("api/accounts/", include("apps.accounts.urls")),
 ]

@@ -33,3 +33,13 @@ class AdminUserUpdateDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
+class UserDetailByIdAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
