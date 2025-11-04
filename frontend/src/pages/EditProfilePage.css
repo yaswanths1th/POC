@@ -1,0 +1,169 @@
+/* ===================== EDIT PROFILE PAGE ===================== */
+
+/* ====== General Layout ====== */
+.edit-profile-page {
+  width: 90%;
+  max-width: 1000px;
+  margin: 50px auto;
+  background: #f9fbff;
+  border-radius: 16px;
+  padding: 35px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ====== Header ====== */
+.edit-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #eaf2ff;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.edit-profile-header h2 {
+  color: #003691;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* ====== Buttons ====== */
+.cancel-btn,
+.logout-btn,
+.save-btn {
+  border: none;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Cancel button */
+.cancel-btn {
+  background: #6c757d;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background: #565e64;
+  transform: translateY(-1px);
+}
+
+/* Logout button (header only) */
+.logout-btn {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+.logout-btn:hover {
+  background: #cc0000;
+  transform: translateY(-1px);
+}
+
+/* Save button */
+.save-btn {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.save-btn:hover {
+  background: #0048b3;
+  transform: translateY(-1px);
+}
+
+/* ====== Button Container (Bottom Section) ====== */
+.action-buttons {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;
+  gap: 20px; /* Space between buttons */
+  margin-top: 35px;
+}
+
+/* ====== Form Cards ====== */
+.edit-profile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 35px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.edit-subsection-title {
+  color: #003691;
+  font-weight: 600;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e0e6f0;
+  padding-bottom: 6px;
+}
+
+/* ====== Form Layout ====== */
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px 28px; /* Increased spacing between fields */
+}
+
+.edit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Adds vertical space between label and input */
+}
+
+/* ====== Input Fields ====== */
+.edit-form-group label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.edit-form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #f9f9f9;
+  color: #000;
+  transition: all 0.25s ease;
+}
+
+.edit-form-group input:hover {
+  background-color: #fff;
+  border-color: #b0b7c3;
+}
+
+.edit-form-group input:focus {
+  border-color: #0d6efd;
+  background: #fff;
+  outline: none;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 600px) {
+  .edit-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+}

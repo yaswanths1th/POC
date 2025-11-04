@@ -1,0 +1,135 @@
+/* ==============================
+   AdminLayout.css — FINAL REFINED
+   ============================== */
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  font-family: "Lato", sans-serif;
+}
+
+/* -------- Sidebar -------- */
+.admin-sidebar {
+  width: 240px;
+  background: #0b2349;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+}
+
+.sidebar-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #cfd8e3;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-link.active {
+  background: #1c3e72;
+  color: #fff;
+}
+
+/* -------- Main Wrapper -------- */
+.admin-main-wrapper {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #f4f6fa;
+}
+
+/* -------- Header -------- */
+.admin-header {
+  height: 64px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid #e3e6eb;
+  position: fixed;
+  top: 0;
+  left: 280px;
+  right: 0;
+  z-index: 1000;
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0b2349;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0b2349;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0b2349;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* -------- Scrollable Content -------- */
+.admin-content {
+  flex: 1;
+  margin-top: 64px;
+  padding: 32px 40px;
+  overflow-y: auto;
+  background: #f6f7fb;
+  scrollbar-width: thin;
+  scrollbar-color: #0b2349 #e6eaf2;
+}
+
+.admin-content::-webkit-scrollbar {
+  width: 8px;
+}
+.admin-content::-webkit-scrollbar-thumb {
+  background-color: #0b2349;
+  border-radius: 8px;
+}
+
+/* Ensure full visibility in long dashboards */
+.admin-page-container {
+  min-height: calc(100vh - 64px);
+}

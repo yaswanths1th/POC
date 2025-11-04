@@ -1,0 +1,162 @@
+/* ===================== VIEW PROFILE PAGE ===================== */
+
+/* ====== General Layout ====== */
+.view-profile-page {
+  width: 90%;
+  max-width: 1000px;
+  margin: 50px auto;
+  background: #f9fbff;
+  border-radius: 16px;
+  padding: 35px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ====== Header ====== */
+.view-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #eaf2ff;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.view-profile-header h2 {
+  color: #003691;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* ====== Buttons ====== */
+.edit-btn,
+.logout-btn {
+  border: none;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.edit-btn {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.edit-btn:hover {
+  background: #0048b3;
+  transform: translateY(-1px);
+}
+
+.logout-btn {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+.logout-btn:hover {
+  background: #cc0000;
+  transform: translateY(-1px);
+}
+
+/* ====== Content Cards ====== */
+.profile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 35px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.subsection-title {
+  color: #003691;
+  font-weight: 600;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e0e6f0;
+  padding-bottom: 6px;
+}
+
+/* ====== Input Grid Layout ====== */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px 28px;
+}
+
+/* ====== Form Groups ====== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ====== Input Fields (EXACT MATCH with Edit Page) ====== */
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  color: #000;
+  transition: all 0.25s ease;
+  height: 46px; /* ensures same height as edit inputs */
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+/* Match hover & focus behavior from Edit Page */
+.form-group input:hover {
+  background-color: #fff;
+  border-color: #b0b7c3;
+}
+
+.form-group input:focus {
+  border-color: #0d6efd;
+  background: #fff;
+  outline: none;
+}
+
+/* Keep read-only look but same dimensions */
+.form-group input:read-only {
+  background-color: #f9f9f9;
+  border-color: #d3d7e0;
+  cursor: default;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 600px) {
+  .view-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+.change-pass-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.change-pass-btn:hover {
+  background-color: #0056b3;
+}

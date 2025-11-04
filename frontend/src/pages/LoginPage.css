@@ -1,0 +1,116 @@
+.login-container {
+  width: 420px;
+  max-width: 95%;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 35px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.login-container h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #003691;
+  margin-bottom: 20px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.login-input {
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  color: #000;
+  transition: all 0.3s ease;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: var(--primary-gradient-end);
+  box-shadow: 0 0 0 3px rgba(26, 117, 255, 0.1);
+  background-color: #fff;
+}
+
+.login-button {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary-gradient-end), #003691);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-error {
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.login-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  color: #2A2A2A;
+}
+
+.forgot-password {
+  font-size: 14px;
+  color: #666;
+}
+
+.forgot-password a {
+  color: var(--primary-gradient-end);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #003691;
+  text-decoration: underline;
+}
+
+.register-link {
+  color: #2A2A2A;
+  font-size: 15px;
+}
+
+.register-link a {
+  color: var(--primary-gradient-end);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  margin-left: 5px;
+}
+
+.register-link a:hover {
+  color: #003691;
+  text-decoration: underline;
+}
