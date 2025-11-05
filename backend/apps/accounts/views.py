@@ -7,31 +7,34 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
 from .serializers import RegisterSerializer, UserSerializer
+from rest_framework import status, permissions
+from rest_framework.views import APIView
 
 
 # 🧩 Register new user
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([permissions.IsAuthenticated])
 def register_user(request):
-    username = request.data.get('username')
-    email = request.data.get('email')
-    phone = request.data.get('phone')
-    password = request.data.get('password')
+    user = request.user
+    data = request.data
 
-    # ✅ Basic validation
-    if not username or not email or not phone or not password:
-        return Response({"detail": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
+    # Admin can create a user
+    is_admin = user.is_superuser or user.is_staff
+    if not is_admin:
+        return Response({"detail": "Permission denied. Admins only."}, status=403)
 
-    if User.objects.filter(username=username).exists():
-        return Response({"detail": "Username already exists."}, status=status.HTTP_400_BAD_REQUEST)
-
-    serializer = RegisterSerializer(data=request.data)
+    serializer = RegisterSerializer(data=data)
     if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        new_user = serializer.save()
 
+        # ✅ If admin provides address data, save it
+        address_data = data.get("address")
+        if address_data:
+            from addresses.models import Address
+            Address.objects.create(user=new_user, **address_data)
+
+        return Response({"message": "User registered successfully!", "id": new_user.id}, status=201)
+    return Response(serializer.errors, status=400)
 
 # 🧠 Profile view/update (for logged-in user)
 @api_view(['GET', 'POST'])
@@ -128,3 +131,45 @@ def get_user_details(request, user_id):
 
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+# 🗑️ Admin Endpoint: Delete User
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request, user_id):
+    user = request.user
+
+    # ✅ Only admins can delete users
+    if not user.is_superuser:
+        return Response({"detail": "Permission denied. Admins only."},
+                        status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        user_to_delete = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # ✅ Prevent self-deletion
+    if user_to_delete == user:
+        return Response({"detail": "You cannot delete your own account."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    user_to_delete.delete()
+    return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+class AdminUpdateUserAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]  # Keep as authenticated
+
+    def put(self, request, user_id):
+        user = request.user
+        if not (user.is_superuser or user.is_staff):
+            return Response({"detail": "Permission denied. Admins only."}, status=403)
+
+        try:
+            user_to_update = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=404)
+
+        serializer = UserSerializer(user_to_update, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)

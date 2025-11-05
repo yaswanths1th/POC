@@ -1,7 +1,7 @@
 // src/admin/ManageUsers.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // ✅ for redirect
+import { useNavigate } from "react-router-dom";
 import "./ManageUsers.css";
 
 export default function ManageUsers() {
@@ -17,10 +17,14 @@ export default function ManageUsers() {
     is_active: "Active",
   });
 
-  const token = localStorage.getItem("access");
-  const navigate = useNavigate(); // ✅ Initialize navigation hook
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // 🔄 Fetch from Django API
+  const usersPerPage = 10;
+  const token = localStorage.getItem("access");
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -50,7 +54,6 @@ export default function ManageUsers() {
     }
   };
 
-  // 🔍 Filtering
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -61,12 +64,41 @@ export default function ManageUsers() {
     return matchesSearch && matchesStatus && matchesRole;
   });
 
-  // 🧭 Redirect to /viewprofile page on edit click
-  const handleEditClick = (user) => {
-    navigate(`/viewprofile/${user.id}`);  // ✅ Redirect
+  // Pagination Logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  // ➕ Inline Add User (unchanged)
+  // When clicking "Edit" from the table we navigate to the user's view profile.
+  // Keep this behavior (so admin can review before editing). We also store edit_user_id
+  // so the EditProfilePage can pick up edit mode when admin moves to edit.
+  const handleEditClick = (user) => {
+    try {
+      localStorage.setItem("edit_user_id", String(user.id));
+    } catch (e) {
+      // ignore storage errors
+    }
+    navigate(`/viewprofile/${user.id}`);
+  };
+
+  // Explicit Add handler: clear any leftover edit_user_id and go to edit-profile (Add mode)
+  const handleAddUser = () => {
+    try {
+      localStorage.removeItem("edit_user_id"); // ensures EditProfilePage enters "Add" mode
+    } catch (e) {
+      // ignore storage errors
+    }
+    navigate("/edit-profile");
+  };
+
   const handleNewUserChange = (e) => {
     const { name, value } = e.target;
     setNewUser({ ...newUser, [name]: value });
@@ -74,7 +106,6 @@ export default function ManageUsers() {
 
   const handleSaveNewUser = () => {
     if (!newUser.name || !newUser.email) {
-      alert("Please fill in all required fields!");
       return;
     }
     const newEntry = {
@@ -88,10 +119,38 @@ export default function ManageUsers() {
 
   const handleCancel = () => setIsAdding(false);
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((u) => u.id !== id));
+  const handleDelete = (user) => {
+    setUserToDelete(user);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+
+    try {
+      const res = await axios.delete(
+        `http://127.0.0.1:8000/api/accounts/delete-user/${userToDelete.id}/`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      if (res.status === 204 || res.status === 200) {
+        setUsers(users.filter((u) => u.id !== userToDelete.id));
+      } else {
+        console.warn("⚠️ Unexpected response:", res.status, res.data);
+      }
+    } catch (err) {
+      console.error("❌ Error deleting user:", err.response?.data || err.message);
+    } finally {
+      setShowConfirm(false);
+      setUserToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
+    setUserToDelete(null);
   };
 
   const handleExport = () => {
@@ -119,7 +178,15 @@ export default function ManageUsers() {
         </div>
         <div className="header-right">
           <button className="btn btn-gray" onClick={handleExport}>Export</button>
-          <button className="btn btn-primary" onClick={() => setIsAdding(true)}>+ Add User</button>
+          <button
+  className="btn btn-primary"
+  onClick={() => {
+    localStorage.removeItem("edit_user_id");
+    navigate("/edit-profile");
+  }}
+>
+  + Add User
+</button>
         </div>
       </div>
 
@@ -130,12 +197,15 @@ export default function ManageUsers() {
           placeholder="Search by name or email..."
           className="search-input"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1); // reset to page 1 on new search
+          }}
         />
         <select
           className="filter-select"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
         >
           <option>All Status</option>
           <option>Active</option>
@@ -144,7 +214,7 @@ export default function ManageUsers() {
         <select
           className="filter-select"
           value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
+          onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
         >
           <option>All Roles</option>
           <option>Admin</option>
@@ -166,7 +236,6 @@ export default function ManageUsers() {
             </tr>
           </thead>
           <tbody>
-            {/* Add new user row */}
             {isAdding && (
               <tr className="adding-row">
                 <td>
@@ -205,9 +274,8 @@ export default function ManageUsers() {
               </tr>
             )}
 
-            {/* Normal user rows */}
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
+            {currentUsers.length > 0 ? (
+              currentUsers.map((user) => (
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -219,9 +287,8 @@ export default function ManageUsers() {
                   </td>
                   <td>{user.joined}</td>
                   <td className="actions">
-                    {/* ✅ Redirect to /viewprofile on click */}
                     <button className="icon-btn edit" onClick={() => handleEditClick(user)}>✏️</button>
-                    <button className="icon-btn delete" onClick={() => handleDelete(user.id)}>🗑️</button>
+                    <button className="icon-btn delete" onClick={() => handleDelete(user)}>🗑️</button>
                   </td>
                 </tr>
               ))
@@ -234,7 +301,46 @@ export default function ManageUsers() {
             )}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        {filteredUsers.length > usersPerPage && (
+          <div className="pagination-controls">
+            <button
+              className="btn btn-gray"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+            >
+              &lt;&lt; Prev
+            </button>
+
+            <span className="page-info">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              className="btn btn-gray"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Next &gt;&gt;
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Custom Delete Popup */}
+      {showConfirm && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete <strong>{userToDelete?.name}</strong>?</p>
+            <div className="confirm-buttons">
+              <button className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              <button className="btn btn-gray" onClick={cancelDelete}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
