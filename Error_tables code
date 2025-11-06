@@ -1,0 +1,132 @@
+CREATE TABLE user_error (
+    id SERIAL PRIMARY KEY,
+    error_code VARCHAR(10) UNIQUE NOT NULL,
+    error_message TEXT NOT NULL,
+    category VARCHAR(100)
+);
+
+
+INSERT INTO user_error (error_code, error_message, category) VALUES
+('EP001', 'Special characters are not allowed in name.', 'Personal Details Validation Errors'),
+('EP002', 'Name is required.', 'Personal Details Validation Errors'),
+('EP003', 'Name cannot exceed 50 characters.', 'Personal Details Validation Errors'),
+('EP004', 'Remove extra spaces from name.', 'Personal Details Validation Errors'),
+('EP005', 'Phone number must contain only digits.', 'Personal Details Validation Errors'),
+('EP006', 'Invalid characters in phone number.', 'Personal Details Validation Errors'),
+('EP007', 'Phone number is required.', 'Personal Details Validation Errors'),
+('EP008', 'Selected country code.', 'Personal Details Validation Errors'),
+('EP009', 'Phone number length is invalid for selected country.', 'Personal Details Validation Errors'),
+('EP010', 'Email must contain ‘‘@’’ symbol.', 'Personal Details Validation Errors'),
+('EP011', 'Email format is invalid.', 'Personal Details Validation Errors'),
+('EP012', 'Invalid domain in email address.', 'Personal Details Validation Errors'),
+('EP013', 'Email contains invalid characters.', 'Personal Details Validation Errors'),
+('EP014', 'Email format is incorrect.', 'Personal Details Validation Errors'),
+('EP015', 'Email is required.', 'Personal Details Validation Errors'),
+('EA001', 'Invalid characters in house/flat number.', 'Address Validation Errors'),
+('EA002', 'House/Flat number is required.', 'Address Validation Errors'),
+('EA003', 'Only letters, numbers, and spaces allowed.', 'Address Validation Errors'),
+('EA004', 'This field is required.', 'Address Validation Errors'),
+('EA005', 'Pin code must be alphanumeric only.', 'Address Validation Errors'),
+('EA006', 'Invalid pin code. Please enter a valid code.', 'Address Validation Errors'),
+('EA007', 'Unable to auto-fill location. Please check pin code.', 'Address Validation Errors'),
+('EA008', 'Auto-fill failed. Pin code is missing.', 'Address Validation Errors'),
+('ES001', 'Please fill all required fields.', 'Form Submission Errors'),
+('ES002', 'Please correct highlighted fields.', 'Form Submission Errors'),
+('ES003', 'Email already registered.', 'Form Submission Errors'),
+('EU001', 'Invalid email format.', 'Profile Update Error'),
+('EU002', 'Fields cannot be empty.', 'Profile Update Error'),
+('EU003', 'Unauthorized access.', 'Profile Update Error'),
+('ER001', 'Access denied.', 'User Remove Errors'),
+('ER002', 'User not found.', 'User Remove Errors'),
+('EH001', 'Non-admin tries to hold user.', 'Hold Functionality'),
+('EV001', 'Incomplete profile information.', 'Profile View'),
+('EV002', 'Unauthorized user tries to view profile.', 'Profile View');
+
+
+
+-----------------------------------------------------------------------------
+
+
+-- Table: user_validation
+CREATE TABLE user_validation (
+    id SERIAL PRIMARY KEY,
+    validation_code VARCHAR(10) UNIQUE NOT NULL,
+    validation_message TEXT NOT NULL,
+    category VARCHAR(100)
+);
+
+INSERT INTO user_validation (validation_message, category, validation_code) VALUES
+('Alphabets only, no special chars', 'Personal Details Validation Errors', 'VP001'),
+('This field is mandatory', 'Personal Details Validation Errors', 'VP002'),
+('Max length is 50', 'Personal Details Validation Errors', 'VP003'),
+('-', 'Personal Details Validation Errors', 'VP004'),
+('digits only', 'Personal Details Validation Errors', 'VP005'),
+('digits only', 'Personal Details Validation Errors', 'VP006'),
+('This field is mandatory', 'Personal Details Validation Errors', 'VP007'),
+('Must select country before enter number', 'Personal Details Validation Errors', 'VP008'),
+('Max length is 10', 'Personal Details Validation Errors', 'VP009'),
+('Must contain “@”', 'Personal Details Validation Errors', 'VP010'),
+('Must contain “@” and valid domain', 'Personal Details Validation Errors', 'VP011'),
+('Must contain “@” and valid domain', 'Personal Details Validation Errors', 'VP012'),
+('no special chars', 'Personal Details Validation Errors', 'VP013'),
+('Must contain “@”', 'Personal Details Validation Errors', 'VP014'),
+('This field is mandatory', NULL, 'VP015'),
+
+('Alphanumeric and spaces allowed', 'Address Validation Errors', 'VA001'),
+('This field is mandatory', 'Address Validation Errors', 'VA002'),
+('Alphanumeric and spaces allowed', 'Address Validation Errors', 'VA003'),
+('This field is mandatory', 'Address Validation Errors', 'VA004'),
+('Alphanumeric only', 'Address Validation Errors', 'VA005'),
+('Invalid pincode', 'Address Validation Errors', 'VA006'),
+('Invalid pin code', 'Address Validation Errors', 'VA007'),
+('Invalid pin code', 'Address Validation Errors', 'VA008'),
+
+('Some fields are missing', 'Form Submission Errors', 'VS001'),
+('Some fields are missing( Highlight mandatory fields)', 'Form Submission Errors', 'VS002'),
+('Email already registered.', 'Form Submission Errors', 'VS003'),
+
+('Must contain “@” and valid domain', 'Profile Update Error', 'VU001'),
+('This field is mandatory', 'Profile Update Error', 'VU002'),
+('You don’t have permission.', 'Profile Update Error', 'VU003'),
+
+('Access denied.', 'User Remove Errors', 'VR001'),
+('Please check user_id', 'User Remove Errors', 'VR002'),
+
+('You don’t have permission.', 'Hold Functionality', 'VH001'),
+
+('Incomplete profile information', 'Profile View', 'VV001'),
+('Access denied', 'Profile View', 'VV002');
+
+
+
+-----------------------------------------------------------------------------------------
+
+
+-- Step 1: Create table
+CREATE TABLE user_information (
+    id SERIAL PRIMARY KEY,
+    information_text TEXT NOT NULL,
+    category VARCHAR(100) NOT NULL
+);
+
+-- Step 2: Insert data
+INSERT INTO user_information (information_text, category, information_code) VALUES
+('Personal details saved successfully.', 'Personal Details Information', 'IP001'),
+('Address added successfully.', 'Address Information', 'IA001'),
+('Address updated successfully.', 'Address Information', 'IA002'),
+('Address deleted successfully.', 'Address Information', 'IA003'),
+('Account created successfully.', 'Registration Information', 'IR001'),
+('Account already verified.', 'Registration Information', 'IR004'),
+('Login successful.', 'Login Information', 'IL001'),
+('Logout successful.', 'Login Information', 'IL002'),
+('Session expired. Please login again.', 'Login Information', 'IL003'),
+('Profile updated successfully.', 'Profile Update Information', 'IPU001'),
+('No changes detected.', 'Profile Update Information', 'IPU003'),
+('Password reset link sent successfully.', 'Forgot Password Information', 'IFP001'),
+('Password reset successful.', 'Forgot Password Information', 'IFP002'),
+('Password changed successfully.', 'Change Password Information', 'ICP001'),
+('Old password verified.', 'Change Password Information', 'ICP002'),
+('User added successfully.', 'Admin Information', 'IAD001'),
+('User removed successfully.', 'Admin Information', 'IAD002'),
+('User access updated successfully.', 'Admin Information', 'IAD003'),
+('No data found, please add your details.', 'Profile View Information', 'IV002');
