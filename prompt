@@ -1,0 +1,48 @@
+I’m building a full-stack web project using React (frontend) and Django REST Framework (backend) for a modular authentication and message system.
+The frontend pages must dynamically display success, error, and validation messages — but without hardcoded user-visible text.
+
+All messages come from the backend (via JSON APIs) or from a fallback constants file, and the frontend should automatically resolve message codes like EF001, EA004, or IF002 into proper readable text.
+
+📘 Backend (Django)
+
+The backend has three database tables:
+
+user_error(error_code, error_message)
+
+user_validation(validation_code, validation_message)
+
+user_information(information_code, information_text)
+
+There’s also a constants.py file that defines a dictionary DEFAULT_MESSAGES containing fallback values (ERRORS, VALIDATIONS, INFORMATION).
+
+I want an endpoint /api/auth/messages/ that returns all DB messages in a JSON format like:
+
+{
+  "user_error": [{ "error_code": "EF001", "error_message": "Email not registered." }],
+  "user_validation": [{ "validation_code": "VA002", "validation_message": "Field cannot be empty." }],
+  "user_information": [{ "information_code": "IF002", "information_text": "Code sent successfully." }]
+}
+
+
+If any table is empty, it should automatically load the corresponding messages from DEFAULT_MESSAGES and return those instead.
+
+🎨 Frontend (React)
+
+The React page must fetch these messages from /api/auth/messages/ and store them in localStorage.
+
+The component should load messages in this order of priority:
+
+Database via API,
+
+LocalStorage (cache),
+
+Fallback constants object (mirror of backend constants.py).
+
+Message lookups should use helper functions like:
+
+getErrorText("EF001")
+getValidationText("VA002")
+getInfoText("IF002")
+
+
+These helpers must first check DB messages, then constants, and finally return the code itself (so the developer sees what’s missing).
